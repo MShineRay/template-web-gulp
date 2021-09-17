@@ -10,6 +10,9 @@ import gulpFileInclude from 'gulp-file-include'
 import gulpCleanCss from 'gulp-clean-css'
 import gulpPlumber from 'gulp-plumber'
 import gulpNotify from 'gulp-notify'
+const gulpSass = require('gulp-sass')(require('sass'))
+
+import gulpPostcss from 'gulp-postcss'
 import gulpCache from 'gulp-cache'
 // import imagemin from 'gulp-imagemin'
 import imageminPngquant from 'imagemin-pngquant'
@@ -96,16 +99,7 @@ function onError(error) {
 //     .pipe(gulp.dest(config.build.html))
 // })
 //
-// gulp.task('styles', () => {
-//   // return gulp.src(config.dev.styles)
-//   //   .pipe(plumber(onError))
-//   //   .pipe(sass({
-//   //     outputStyle: 'compressed'
-//   //   })).on('error', sass.logError)
-//   //   .pipe(gulpif(isProduction, gulpCleanCss({debug: true})))
-//   //   .pipe(postcss('./.postcssrc.js'))
-//   //   .pipe(gulp.dest(config.build.styles))
-// })
+
 //
 // gulp.task('images', () => {
 //   return gulp
@@ -242,10 +236,19 @@ const taskHtml = series(html, function(cb){
   cb()
 })
 
-
-function styles(cb){
+// gulp.task('styles', () => {
+//
+// })
+function styles(){
   console.log('gulp task styles: begin')
-  cb()
+  return src(config.dev.styles)
+    .pipe(gulpPlumber(onError))
+    .pipe(gulpSass({
+      outputStyle: 'compressed'
+    })).on('error', gulpSass.logError)
+    .pipe(gulpIf(isProduction, gulpCleanCss({ debug: true })))
+    .pipe(gulpPostcss('./.postcssrc.js'))
+    .pipe(dest(config.build.styles))
 }
 const taskStyles = series(styles, function(cb){
   console.log('gulp task styles: end')
@@ -253,24 +256,6 @@ const taskStyles = series(styles, function(cb){
 })
 
 
-
-// `build` 函数被导出（export）了，因此它是一个公开任务（public task），并且可以被 `gulp` 命令直接调用。
-// 它也仍然可以被用在 `series()` 组合中。
-function buildBegin(cb) {
-  // body omitted
-  console.log('gulp task build: begin')
-  //   const task = ['html', 'styles', 'script', 'assets', 'images', 'static']
-  //   cbTask(task).then(() => {
-  //     console.log('编译完成.\n')
-  //
-  //     if (config.productionZip) {
-  //       gulp.start('zip', () => {
-  //         console.log('压缩完成.\n')
-  //       })
-  //     }
-  //   })
-  cb()
-}
 
 function zip(){
   console.log('gulp task zip: begin')
@@ -284,6 +269,13 @@ const taskZip = series(zip, function(cb){
   cb()
 })
 
+// `build` 函数被导出（export）了，因此它是一个公开任务（public task），并且可以被 `gulp` 命令直接调用。
+// 它也仍然可以被用在 `series()` 组合中。
+function buildBegin(cb) {
+  // body omitted
+  console.log('gulp task build: begin')
+  cb()
+}
 const taskBuild = parallel(buildBegin, taskHtml, taskStyles/*, taskScript, taskAssets, taskImages, taskStatic*/, function(cb){
   console.log('gulp task build: end')
   if (config.productionZip) {
