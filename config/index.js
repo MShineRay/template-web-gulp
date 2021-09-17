@@ -1,24 +1,18 @@
-// const server = require('./server')
-// const path = require('path')
-
-import server from './server.js'
-import path from 'path'
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const path = require('path')
+const server = require('./server')
 // var template = require("art-template")
 
 function resolveDev(dir) {
-  console.log('------'+ path.join(__dirname, '../src/', dir))
+  console.log('?????????'+ path.join(__dirname, '../src/', dir) + '???????????')
   return path.join(__dirname, '../src/', dir)
 }
 
 function resolveBuild(dir) {
-  console.log('+++++'+ path.join(__dirname, '../dist/', dir))
+  console.log('++++++++++++++++++'+ path.join(__dirname, '../dist/', dir) + '++++++++++++++')
   return path.join(__dirname, '../dist/', dir)
 }
-const config = {
+
+module.exports = {
   dev: {
     static: './static/**/*',
     html: [resolveDev('/**/*.html'), '!./src/include/**/*'],
@@ -58,8 +52,5 @@ const config = {
 
   server,
   useEslint: false,
-  productionZip: false
+  productionZip: true
 }
-
-// module.exports = config
-export default config

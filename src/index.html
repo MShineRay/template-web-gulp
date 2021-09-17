@@ -3,36 +3,19 @@
 <head>
   @include('public_header.html')
 </head>
-<body class="layui-layout-body" style="visibility:hidden;">
-  
-  <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
-    <legend>图片懒加载</legend>
-  </fieldset>
-  <div class="demo">
-    <script type="text/html" id="demoTpl">
-      {{each list}}
-        <img class="picDetail" src='/static/images/loading.gif' lay-src="{{$value.image_url}}">
-      {{/each}}
-    </script>
-  </div>
-  
-  @include('public_footer.html')
-  @include('public_script.html')
-    <script type="text/javascript">
-      require(['index'], () => {
-        layui.use('flow', function(){
-          var flow = layui.flow;          
-          //按屏加载图片
-          flow.lazyimg({
-            elem: '.demo img'
-            ,scrollElem: '.demo'
-          });
-          
-        });
+<body>
+<div id="app">loading...</div>
+<script type="text/html" id="demoTpl">
+  <div>hello world</div>
+</script>
 
-      });
+@include('public_footer.html')
+@include('public_script.html')
+<script type="text/javascript">
+  require(['index'], () => {
 
-    </script>
+  });
+</script>
 </body>
 
 </html>
