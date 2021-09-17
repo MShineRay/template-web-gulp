@@ -1,21 +1,21 @@
-const proxy = require('http-proxy-middleware');
+const { createProxyMiddleware } = require('http-proxy-middleware')
 
-const jsonProxy = proxy('/api', {
-    target: 'https://www.xx.com/',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api': ''
-    },
-    logLevel: 'debug'
+const jsonProxy = createProxyMiddleware('/api', {
+  target: 'http://localhost',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api': ''
+  },
+  logLevel: 'debug'
 })
 
 module.exports = {
-    server: {
-        baseDir: './dist',
-        middleware: [jsonProxy]
-    },
-    open: true,
-    ui: false,
-    ghostMode: false,
-    port: '9527'
+  server: {
+    baseDir: './dist',
+    middleware: [jsonProxy]
+  },
+  open: true,
+  ui: false,
+  ghostMode: false,
+  port: '9527'
 }

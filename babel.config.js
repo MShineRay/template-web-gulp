@@ -1,21 +1,15 @@
-/**
- *
- * @reference https://youzan.github.io/vant/#/zh-CN/quickstart#fang-shi-yi.-zi-dong-an-xu-yin-ru-zu-jian-tui-jian
- */
+// babel.config.js
 module.exports = {
-  presets: ['@vue/cli-plugin-babel/preset'],
-  plugins: [
-    [
-      'import',
-      {
-        libraryName: 'vant',
-        libraryDirectory: 'es',
-        // style: true,
-        // 指定样式路径
-        // @reference https://youzan.github.io/vant/#/zh-CN/theme#an-xu-yin-ru-yang-shi-tui-jian
-        style: name => `${name}/style/less`,
-      },
-      'vant',
-    ],
+  presets: [
+    ['@babel/preset-env', { targets: { node: 'current' } }]
   ],
+  env: {
+    'test': {
+      'plugins': [
+        '@babel/plugin-transform-modules-commonjs',
+        'transform-es2015-modules-commonjs',
+        'syntax-dynamic-import'
+      ]// fix:  SyntaxError: Unexpected token 'export'
+    }
+  }
 }

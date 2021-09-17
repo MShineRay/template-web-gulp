@@ -3,19 +3,19 @@ const server = require('./server')
 // var template = require("art-template")
 
 function resolveDev(dir) {
-  console.log(path.join(__dirname, '../src/', dir))
+  console.log('?????????'+ path.join(__dirname, '../src/', dir) + '???????????')
   return path.join(__dirname, '../src/', dir)
 }
 
 function resolveBuild(dir) {
-  console.log(path.join(__dirname, '../dist/', dir))
+  console.log('++++++++++++++++++'+ path.join(__dirname, '../dist/', dir) + '++++++++++++++')
   return path.join(__dirname, '../dist/', dir)
 }
 
 module.exports = {
   dev: {
     static: './static/**/*',
-    html:  [resolveDev('/**/*.html'), '!./src/include/**/*'],
+    html: [resolveDev('/**/*.html'), '!./src/include/**/*'],
     allhtml: resolveDev('/**/*.html'),
     styles: resolveDev('static/styles/*.{scss,css}'),
     script: resolveDev('static/js/**/*.js'),
@@ -52,5 +52,5 @@ module.exports = {
 
   server,
   useEslint: false,
-  productionZip: false
+  productionZip: true
 }
