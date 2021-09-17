@@ -11,6 +11,8 @@
 // ? Do you require semicolons? No
 
 module.exports = {
+  root: true,
+  parser: 'babel-eslint',
   'env': {
     'browser': true,
     'node': true,
@@ -44,12 +46,14 @@ module.exports = {
   'extends': 'eslint:recommended',
   'globals': {
     'Atomics': 'readonly',
-    'SharedArrayBuffer': 'readonly'
+    'SharedArrayBuffer': 'readonly',
+    document: true,
+    location: true,
+    window: true,
   },
   'parserOptions': {
     'ecmaVersion': 2018,
     'sourceType': 'module'
-
     // "ecmaVersion": 12,
     // "sourceType": "module",
     // "ecmaFeatures": {}
