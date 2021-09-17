@@ -347,7 +347,7 @@ function getVariable (code) {
     .replace(NUMBER_RE, '')
     .replace(BOUNDARY_RE, '')
     .split(SPLIT2_RE);
-};
+}
 
 
 // 字符串转义
@@ -583,7 +583,7 @@ function compiler (source, options) {
     }
     
     
-};
+}
 
 
 

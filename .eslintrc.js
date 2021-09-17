@@ -10,9 +10,7 @@ module.exports = {
     node: true,
   },
   extends: [
-    "plugin:vue/essential",
-    "eslint:recommended",
-    "@vue/prettier"
+    "eslint:recommended"
   ],
   // plugins: [
   //   'import'
@@ -106,7 +104,7 @@ module.exports = {
     // 'eqeqeq': 2,
     // 'no-extend-native': 2,
     // 'no-eval': 2,
-    // 'no-undef': 2,
+    'no-undef': 1,
     // 'no-var': 2,
     // 'no-redeclare': 2,
     // 'prefer-promise-reject-errors': 2,

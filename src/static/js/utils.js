@@ -1,6 +1,8 @@
-define(['jquery'], function($) {
+// eslint-disable-next-line no-undef
+define(['jquery'], function(/*$*/) {
     return {
         GetRequest: function() {
+          // eslint-disable-next-line no-undef
             var url = location.search;
             var theRequest = {};
             if (url.indexOf("?") != -1) {
@@ -13,10 +15,11 @@ define(['jquery'], function($) {
             return theRequest;
         },
         b64DecodeUnicode: function(str) {
+          // eslint-disable-next-line no-undef
             return decodeURIComponent(atob(str).split('').map(function(transBase64) {
                 return '%' + ('00' + transBase64.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
         },
-        interfaceProxy: () => '/api'
+        // interfaceProxy: () => '/api'
     }
 });
