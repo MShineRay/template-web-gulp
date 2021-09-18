@@ -14,7 +14,7 @@ const gulpSass = require('gulp-sass')(require('sass'))
 import gulpPostcss from 'gulp-postcss'
 import gulpZip from 'gulp-zip'
 import gulpCache from 'gulp-cache'
-// import gulpImagemin from 'gulp-imagemin'
+import gulpImagemin from 'gulp-imagemin'
 import imageminPngquant from 'imagemin-pngquant'
 import gulpEslint from 'gulp-eslint'
 import gulpStripDebug from 'gulp-strip-debug'
@@ -74,6 +74,7 @@ function onError(error) {
 //   })
 // }
 function images() {
+  console.log('taskImages: begin')
   return src(config.dev.images)
     .pipe(gulpPlumber(onError))
     .pipe(
@@ -87,8 +88,13 @@ function images() {
     )
     .pipe(gulp.dest(config.build.images))
 }
+const taskImages = series(images, function(cb) {
+  console.log('taskImages: end')
+  cb()
+})
 
 function eslint() {
+  console.log('taskEslint: begin')
   return src(config.dev.script)
     .pipe(gulpPlumber(onError))
     .pipe(gulpIf(isProduction, gulpStripDebug()))
@@ -96,9 +102,13 @@ function eslint() {
     .pipe(gulpEslint.format())
     .pipe(gulpEslint.failAfterError())
 }
+const taskEslint = series(eslint, function(cb) {
+  console.log('taskEslint: end')
+  cb()
+})
 
 function scripts(){
-  console.log('gulp task scripts: begin')
+  console.log('taskScripts: begin')
   return src(config.dev.script)
     .pipe(gulpPlumber(onError))
     .pipe(
@@ -112,36 +122,41 @@ function scripts(){
     .pipe(gulpIf(isProduction, gulpUglify()))
     .pipe(gulp.dest(config.build.script))
 }
-
-
 const taskScript = series(scripts, function(cb) {
-  console.log('gulp task scripts: end')
+  console.log('taskScripts: end')
   cb()
 })
-// const useEslint = config.useEslint ? ['eslint'] : []
-// gulp.task('script', useEslint, () => {
-//   return gulp
-//     .src(config.dev.script)
-//     .pipe(gulpPlumber(onError))
-//     .pipe(
-//       gulpIf(
-//         isProduction,
-//         gulpBabel({
-//           presets: ['env'],
-//         })
-//       )
-//     )
-//     .pipe(gulpIf(isProduction, gulpUglify()))
-//     .pipe(gulp.dest(config.build.script))
-// })
-//
+
+const taskNoop = function(cb){
+  cb()
+}
+
+const useEslint = config.useEslint ? taskEslint : taskNoop
+function assets(){
+  return gulp.src(config.dev.assets).pipe(gulp.dest(config.build.assets))
+}
 // gulp.task('assets', useEslint, () => {
 //   return gulp.src(config.dev.assets).pipe(gulp.dest(config.build.assets))
 // })
+const taskAssets = series(useEslint, assets, function(cb){
+  console.log('taskAssets: end')
+  cb()
+})
 //
 // gulp.task('static', () => {
 //   return gulp.src(config.dev.static).pipe(gulp.dest(config.build.static))
 // })
+
+function staticTask(){
+  console.log('taskStatic: begin')
+  return gulp.src(config.dev.static).pipe(gulp.dest(config.build.static))
+}
+
+const taskStatic = series(staticTask, function(cb){
+  console.log('taskStatic: end')
+  cb()
+})
+
 // gulp.task('watch', () => {
 //   gulp.watch(config.dev.allhtml, ['html']).on('change', reload)
 //   gulp.watch(config.dev.styles, ['styles']).on('change', reload)
@@ -174,15 +189,15 @@ const taskScript = series(scripts, function(cb) {
 // `clean` 函数并未被导出（export），因此被认为是私有任务（private task）。
 // 它仍然可以被用在 `series()` 组合中。
 function clean(cb) {
-  console.log('gulp task clean: begin')
+  console.log('taskClean: begin')
   del('./dist').then(() => {
-    console.log('gulp task clean: end')
+    console.log('taskClean: end')
     cb()
   })
 }
 
 function html() {
-  console.log('gulp task html: begin')
+  console.log('taskHtml: begin')
   return src(config.dev.html)
     .pipe(gulpPlumber(onError))
     .pipe(
@@ -205,15 +220,14 @@ function html() {
     )
     .pipe(gulp.dest(config.build.html))
 }
-
 const taskHtml = series(html, function(cb) {
-  console.log('gulp task html: end')
+  console.log('taskHtml: end')
   cb()
 })
 
 
 function styles() {
-  console.log('gulp task styles: begin')
+  console.log('taskStyles: begin')
   return src(config.dev.styles)
     .pipe(gulpPlumber(onError))
     .pipe(gulpSass({
@@ -223,14 +237,13 @@ function styles() {
     .pipe(gulpPostcss('./.postcssrc.js'))
     .pipe(dest(config.build.styles))
 }
-
 const taskStyles = series(styles, function(cb) {
-  console.log('gulp task styles: end')
+  console.log('taskStyles: end')
   cb()
 })
 
 function zip() {
-  console.log('gulp task zip: begin')
+  console.log('taskZip: begin')
   return src(config.zip.path)
     .pipe(gulpPlumber(onError))
     .pipe(gulpZip(config.zip.name))
@@ -238,7 +251,7 @@ function zip() {
 }
 
 const taskZip = series(zip, function(cb) {
-  console.log('gulp task zip: end')
+  console.log('taskZip: end')
   cb()
 })
 
@@ -246,22 +259,31 @@ const taskZip = series(zip, function(cb) {
 // 它也仍然可以被用在 `series()` 组合中。
 function buildBegin(cb) {
   // body omitted
-  console.log('gulp task build: begin')
+  console.log('taskBuild: begin')
   cb()
 }
 
-const taskBuild = parallel(buildBegin, taskHtml, taskStyles, taskScript/*, taskAssets, taskImages, taskStatic*/, function(cb) {
-  console.log('gulp task build: end')
-  if (config.productionZip) {
-    taskZip(cb)
-  } else {
-    cb()
+const taskBuild = parallel(
+  buildBegin,
+  taskHtml,
+  taskStyles,
+  taskScript,
+  taskAssets,
+  taskImages,
+  taskStatic,
+  function(cb) {
+    console.log('taskBuild: end')
+    if (config.productionZip) {
+      taskZip(cb)
+    } else {
+      cb()
+    }
   }
-})
+)
 
 
 function uglifyJS() {
-  console.log('gulp task uglifyJS: begin')
+  console.log('taskuglifyJS: begin')
   return src('src/*.js')
     .pipe(gulpBabel())
     .pipe(dest('dist/'))
@@ -269,20 +291,18 @@ function uglifyJS() {
     .pipe(gulpRename({ extname: '.min.js' }))
     .pipe(dest('dist/'))
 }
-
 const taskUglifyJS = series(uglifyJS, function(cb) {
-  console.log('gulp task uglifyJS: end')
+  console.log('taskuglifyJS: end')
   cb()
 })
 
 
 function defaultBegin(cb) {
-  console.log('gulp task default: begin')
+  console.log('taskdefault: begin')
   cb()
 }
-
 const taskDefault = series(defaultBegin, clean, taskBuild, function(cb) {
-  console.log('gulp task default: end')
+  console.log('taskdefault: end')
   cb()
 })
 
