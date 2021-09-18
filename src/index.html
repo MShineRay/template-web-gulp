@@ -6,14 +6,14 @@
 <body>
 <div id="app">loading...</div>
 <script type="text/html" id="demoTpl">
-  <div>hello world</div>
+  <div>hello world <div id="test"></div></div>
 </script>
 
 @include('public_footer.html')
 @include('public_script.html')
 <script type="text/javascript">
-  require(['index'], () => {
-
+  require(['index'], ($) => {
+    $('#test').html('!')
   });
 </script>
 </body>

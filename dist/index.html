@@ -16,7 +16,7 @@
 <body>
 <div id="app">loading...</div>
 <script type="text/html" id="demoTpl">
-  <div>hello world</div>
+  <div>hello world <div id="test"></div></div>
 </script>
 
 <div class="footer">
@@ -25,12 +25,12 @@
 
 <script type="text/javascript" src="./static/assets/require/require.js"></script>
 <script type="text/javascript" src="./static/js/require.config.js"></script>
-<script type="text/javascript" src="./static/assets/layui/layui.js"></script>
+<!--<script type="text/javascript" src="./static/assets/layui/layui.js"></script>-->
 
 
 <script type="text/javascript">
-  require(['index'], () => {
-
+  require(['index'], ($) => {
+    $('#test').html('!')
   });
 </script>
 </body>
