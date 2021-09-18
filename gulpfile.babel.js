@@ -135,17 +135,11 @@ const useEslint = config.useEslint ? taskEslint : taskNoop
 function assets(){
   return gulp.src(config.dev.assets).pipe(gulp.dest(config.build.assets))
 }
-// gulp.task('assets', useEslint, () => {
-//   return gulp.src(config.dev.assets).pipe(gulp.dest(config.build.assets))
-// })
+
 const taskAssets = series(useEslint, assets, function(cb){
   console.log('taskAssets: end')
   cb()
 })
-//
-// gulp.task('static', () => {
-//   return gulp.src(config.dev.static).pipe(gulp.dest(config.build.static))
-// })
 
 function staticTask(){
   console.log('taskStatic: begin')
@@ -170,19 +164,6 @@ const taskStatic = series(staticTask, function(cb){
 //     browserSync.init(config.server)
 //     console.log('项目启动成功.\n')
 //     gulp.start('watch')
-//   })
-// })
-//
-// gulp.task('build', () => {
-//   const task = ['html', 'styles', 'script', 'assets', 'images', 'static']
-//   cbTask(task).then(() => {
-//     console.log('编译完成.\n')
-//
-//     if (config.productionZip) {
-//       gulp.start('zip', () => {
-//         console.log('压缩完成.\n')
-//       })
-//     }
 //   })
 // })
 
@@ -283,7 +264,7 @@ const taskBuild = parallel(
 
 
 function uglifyJS() {
-  console.log('taskuglifyJS: begin')
+  console.log('taskUglifyJS: begin')
   return src('src/*.js')
     .pipe(gulpBabel())
     .pipe(dest('dist/'))
@@ -292,17 +273,17 @@ function uglifyJS() {
     .pipe(dest('dist/'))
 }
 const taskUglifyJS = series(uglifyJS, function(cb) {
-  console.log('taskuglifyJS: end')
+  console.log('taskUglifyJS: end')
   cb()
 })
 
 
 function defaultBegin(cb) {
-  console.log('taskdefault: begin')
+  console.log('taskDefault: begin')
   cb()
 }
 const taskDefault = series(defaultBegin, clean, taskBuild, function(cb) {
-  console.log('taskdefault: end')
+  console.log('taskDefault: end')
   cb()
 })
 
