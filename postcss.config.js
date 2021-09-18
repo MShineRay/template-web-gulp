@@ -5,6 +5,22 @@
  */
 module.exports = {
   plugins: {
+    // 引入内联样式表的方法
+    'postcss-import': {},
+    //下一版css
+    'postcss-cssnext': {
+      'warnForDuplicates': false
+    },
+    // 自动添加前缀
+    'autoprefixer': {
+      'overrideBrowserslist': [
+        '> 1%',
+        'last 6 versions',
+        'not ie < 8',
+        'Android >= 4.0',
+        'iOS >= 8'
+      ]
+    },
     'postcss-px-to-viewport': {
       unitToConvert: 'px', // 要转化的单位
       viewportWidth: 750, // UI设计稿的宽度
@@ -18,6 +34,6 @@ module.exports = {
       replace: true, // 是否转换后直接更换属性值
       exclude: [/node_modules/], // 设置忽略文件，用正则做目录名匹配
       landscape: false, // 是否处理横屏情况
-    },
+    }
   },
 }

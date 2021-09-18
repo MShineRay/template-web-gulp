@@ -1,6 +1,6 @@
-import path from 'path'
+// import path from 'path'
 import del from 'del'
-import gulp, { src, dest, series, watch, parallel } from 'gulp'
+import gulp, { src, dest, series, parallel } from 'gulp'
 import gulpBabel from 'gulp-babel'
 import gulpUglify from 'gulp-uglify'
 import gulpRename from 'gulp-rename'
@@ -18,14 +18,14 @@ import gulpImagemin from 'gulp-imagemin'
 import imageminPngquant from 'imagemin-pngquant'
 import gulpEslint from 'gulp-eslint'
 import gulpStripDebug from 'gulp-strip-debug'
-import gulpSequence from 'gulp-sequence'
-import browserSync from 'browser-sync'
+// import gulpSequence from 'gulp-sequence'
+// import browserSync from 'browser-sync'
 
 import config from './config/index.js'
 
-// // server
-// // const browserSync = require('browser-sync').create()
-// const reload = browserSync.reload
+// server
+const browserSync = require('browser-sync').create()
+const reload = browserSync.reload
 //
 // // NODE_ENV development
 const env = process.env.NODE_ENV || 'development'
@@ -151,13 +151,19 @@ const taskStatic = series(staticTask, function(cb){
   cb()
 })
 
-// gulp.task('watch', () => {
-//   gulp.watch(config.dev.allhtml, ['html']).on('change', reload)
-//   gulp.watch(config.dev.styles, ['styles']).on('change', reload)
-//   gulp.watch(config.dev.script, ['script']).on('change', reload)
-//   gulp.watch(config.dev.images, ['images']).on('change', reload)
-//   gulp.watch(config.dev.static, ['static']).on('change', reload)
-// })
+function taskWatch(){
+  gulp.watch(config.dev.allhtml, taskHtml).on('change', reload)
+  gulp.watch(config.dev.styles, taskStyles).on('change', reload)
+  gulp.watch(config.dev.script, taskScript).on('change', reload)
+  gulp.watch(config.dev.images, taskImages).on('change', reload)
+  gulp.watch(config.dev.static, taskStatic).on('change', reload)
+}
+
+// const taskWatch = function(cb){
+//   console.log('taskWatch: end')
+//
+//   cb()
+// }
 // gulp.task('server', () => {
 //   const task = ['html', 'styles', 'script', 'assets', 'images', 'static']
 //   cbTask(task).then(() => {
@@ -169,7 +175,7 @@ const taskStatic = series(staticTask, function(cb){
 
 // `clean` 函数并未被导出（export），因此被认为是私有任务（private task）。
 // 它仍然可以被用在 `series()` 组合中。
-function clean(cb) {
+const taskClean = function(cb) {
   console.log('taskClean: begin')
   del('./dist').then(() => {
     console.log('taskClean: end')
@@ -215,7 +221,7 @@ function styles() {
       outputStyle: 'compressed'
     })).on('error', gulpSass.logError)
     .pipe(gulpIf(isProduction, gulpCleanCss({ debug: true })))
-    .pipe(gulpPostcss('./.postcssrc.js'))
+    .pipe(gulpPostcss('./postcss.config.js'))
     .pipe(dest(config.build.styles))
 }
 const taskStyles = series(styles, function(cb) {
@@ -282,7 +288,7 @@ function defaultBegin(cb) {
   console.log('taskDefault: begin')
   cb()
 }
-const taskDefault = series(defaultBegin, clean, taskBuild, function(cb) {
+const taskDefault = series(defaultBegin, taskClean, taskBuild, gulp.series(taskWatch), function(cb) {
   console.log('taskDefault: end')
   cb()
 })
