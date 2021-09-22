@@ -20,12 +20,14 @@ import gulpEslint from 'gulp-eslint'
 import gulpStripDebug from 'gulp-strip-debug'
 // import gulpSequence from 'gulp-sequence'
 // import browserSync from 'browser-sync'
-
+// import gulpConcat from 'gulp-concat'
+import gulpConnect from 'gulp-connect'
+import gulpOpen from 'gulp-open'
 import config from './config/index.js'
 
 // server
-const browserSync = require('browser-sync').create()
-const reload = browserSync.reload
+// const browserSync = require('browser-sync').create()
+// const reload = browserSync.reload
 //
 // // NODE_ENV development
 const env = process.env.NODE_ENV || 'development'
@@ -152,11 +154,12 @@ const taskStatic = series(staticTask, function(cb){
 })
 
 function taskWatch(){
-  gulp.watch(config.dev.allhtml, taskHtml).on('change', reload)
-  gulp.watch(config.dev.styles, taskStyles).on('change', reload)
-  gulp.watch(config.dev.script, taskScript).on('change', reload)
-  gulp.watch(config.dev.images, taskImages).on('change', reload)
-  gulp.watch(config.dev.static, taskStatic).on('change', reload)
+  gulp.watch(config.dev.allhtml, taskHtml).on('change', gulpConnect.reload)
+  gulp.watch(config.dev.styles, taskStyles).on('change', gulpConnect.reload)
+  gulp.watch(config.dev.script, taskScript).on('change', gulpConnect.reload)
+  gulp.watch(config.dev.images, taskImages).on('change', gulpConnect.reload)
+  gulp.watch(config.dev.static, taskStatic).on('change', gulpConnect.reload)
+  // gulp.watch('./src/**/*.*', series(taskBuild, taskReload))//监听src下所有文件
 }
 
 // const taskWatch = function(cb){
@@ -292,6 +295,49 @@ const taskDefault = series(defaultBegin, taskClean, taskBuild, gulp.series(taskW
   console.log('taskDefault: end')
   cb()
 })
+
+
+function taskConnect(cb){
+  console.log('taskConnect: begin')
+  gulpConnect.server({
+    root: 'dist',
+    livereload: true,
+    // port: 8080
+  }, function startedCallback(){
+    console.log('taskConnect: end')
+    // const options = {
+    //   uri: 'http://localhost:8080',
+    //   app: 'chrome'
+    // }
+    // gulpOpen(options)
+    cb()
+  })
+}
+
+// const taskReload = function(){
+//   return src('./src/**/*.*')
+//     .pipe(gulpConnect.reload())
+// }
+
+
+function taskOpen(){
+  console.log('taskOpen: begin')
+  const options = {
+    uri: 'http://localhost:8080',
+    app: 'google-chrome'
+  }
+  return src('./dist/index.html')
+    .pipe(gulpOpen(options))
+}
+
+function devBegin(cb){
+  console.log('taskDev: begin')
+  cb()
+}
+
+const taskDev = series(devBegin, taskConnect, taskOpen, taskDefault)
+
+exports.dev = taskDev
 
 exports.uglifyJS = taskUglifyJS
 exports.build = taskBuild
