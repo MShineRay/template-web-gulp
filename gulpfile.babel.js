@@ -23,21 +23,23 @@ import gulpStripDebug from 'gulp-strip-debug'
 // import gulpConcat from 'gulp-concat'
 import gulpConnect from 'gulp-connect'
 import gulpOpen from 'gulp-open'
+import os from 'os'
+
 import config from './config/index.js'
 
-// server
-// const browserSync = require('browser-sync').create()
-// const reload = browserSync.reload
-//
-// // NODE_ENV development
+// NODE_ENV development
 const env = process.env.NODE_ENV || 'development'
 const isProduction = env === 'production'
-//
-// function respath(dir) {
-//   console.log('--------' + path.join(__dirname, './', dir) + '-------------')
-//   return path.join(__dirname, './', dir)
-// }
-//
+const taskEslint = series(eslint, function(cb) {
+  console.log('taskEslint: end')
+  cb()
+})
+
+const taskNoop = function(cb){
+  cb()
+}
+
+const useEslint = config.useEslint ? taskEslint : taskNoop
 function onError(error) {
   const title = error.plugin + ' ' + error.name
   const msg = error.message
@@ -52,29 +54,6 @@ function onError(error) {
   //在监听的文件发生变化后自动编译
   this.emit('end')
 }
-
-//
-// function cbTask(task) {
-//   return new Promise((resolve/*, reject*/) => {
-//     del(respath('dist')).then(paths => {
-//       console.log(
-//         `
-//       +++++++++++++++++++++++++++++
-//         删除dist目录
-//       +++++++++++++++++++++++++++++` + paths
-//       )
-//       gulpSequence(task, () => {
-//         console.log(
-//           `
-//         +++++++++++++++++++++++++++++
-//           所有静态资源同步编译完成
-//         +++++++++++++++++++++++++++++` + task
-//         )
-//         resolve()
-//       })
-//     })
-//   })
-// }
 function images() {
   console.log('taskImages: begin')
   return src(config.dev.images)
@@ -103,11 +82,8 @@ function eslint() {
     .pipe(gulpEslint({ configFle: './.eslintrc.js' }))
     .pipe(gulpEslint.format())
     .pipe(gulpEslint.failAfterError())
+    .pipe(gulpConnect.reload())
 }
-const taskEslint = series(eslint, function(cb) {
-  console.log('taskEslint: end')
-  cb()
-})
 
 function scripts(){
   console.log('taskScripts: begin')
@@ -123,19 +99,19 @@ function scripts(){
     )
     .pipe(gulpIf(isProduction, gulpUglify()))
     .pipe(gulp.dest(config.build.script))
+    .pipe(gulpConnect.reload())
+
 }
-const taskScript = series(scripts, function(cb) {
+const taskScript = series(useEslint, scripts, function(cb) {
   console.log('taskScripts: end')
   cb()
 })
 
-const taskNoop = function(cb){
-  cb()
-}
-
-const useEslint = config.useEslint ? taskEslint : taskNoop
 function assets(){
-  return gulp.src(config.dev.assets).pipe(gulp.dest(config.build.assets))
+  return gulp.src(config.dev.assets)
+    .pipe(gulp.dest(config.build.assets))
+    .pipe(gulpConnect.reload())
+
 }
 
 const taskAssets = series(useEslint, assets, function(cb){
@@ -145,7 +121,10 @@ const taskAssets = series(useEslint, assets, function(cb){
 
 function staticTask(){
   console.log('taskStatic: begin')
-  return gulp.src(config.dev.static).pipe(gulp.dest(config.build.static))
+  return gulp.src(config.dev.static)
+    .pipe(gulp.dest(config.build.static))
+    .pipe(gulpConnect.reload())
+
 }
 
 const taskStatic = series(staticTask, function(cb){
@@ -154,27 +133,13 @@ const taskStatic = series(staticTask, function(cb){
 })
 
 function taskWatch(){
-  gulp.watch(config.dev.allhtml, taskHtml).on('change', gulpConnect.reload)
-  gulp.watch(config.dev.styles, taskStyles).on('change', gulpConnect.reload)
-  gulp.watch(config.dev.script, taskScript).on('change', gulpConnect.reload)
-  gulp.watch(config.dev.images, taskImages).on('change', gulpConnect.reload)
-  gulp.watch(config.dev.static, taskStatic).on('change', gulpConnect.reload)
+  gulp.watch(config.dev.allhtml, taskHtml)//.on('change', gulpConnect.reload())
+  gulp.watch(config.dev.styles, taskStyles)//.on('change', gulpConnect.reload())
+  gulp.watch(config.dev.script, taskScript)//.on('change', gulpConnect.reload())
+  gulp.watch(config.dev.images, taskImages)//.on('change', gulpConnect.reload())
+  gulp.watch(config.dev.static, taskStatic)//.on('change', gulpConnect.reload())
   // gulp.watch('./src/**/*.*', series(taskBuild, taskReload))//监听src下所有文件
 }
-
-// const taskWatch = function(cb){
-//   console.log('taskWatch: end')
-//
-//   cb()
-// }
-// gulp.task('server', () => {
-//   const task = ['html', 'styles', 'script', 'assets', 'images', 'static']
-//   cbTask(task).then(() => {
-//     browserSync.init(config.server)
-//     console.log('项目启动成功.\n')
-//     gulp.start('watch')
-//   })
-// })
 
 // `clean` 函数并未被导出（export），因此被认为是私有任务（private task）。
 // 它仍然可以被用在 `series()` 组合中。
@@ -209,6 +174,7 @@ function html() {
       )
     )
     .pipe(gulp.dest(config.build.html))
+    .pipe(gulpConnect.reload())
 }
 const taskHtml = series(html, function(cb) {
   console.log('taskHtml: end')
@@ -226,8 +192,9 @@ function styles() {
     .pipe(gulpIf(isProduction, gulpCleanCss({ debug: true })))
     .pipe(gulpPostcss('./postcss.config.js'))
     .pipe(dest(config.build.styles))
+    .pipe(gulpConnect.reload())
 }
-const taskStyles = series(styles, function(cb) {
+const taskStyles = series(useEslint, styles, function(cb) {
   console.log('taskStyles: end')
   cb()
 })
@@ -280,8 +247,9 @@ function uglifyJS() {
     .pipe(gulpUglify())
     .pipe(gulpRename({ extname: '.min.js' }))
     .pipe(dest('dist/'))
+    .pipe(gulpConnect.reload())
 }
-const taskUglifyJS = series(uglifyJS, function(cb) {
+const taskUglifyJS = series(useEslint, uglifyJS, function(cb) {
   console.log('taskUglifyJS: end')
   cb()
 })
@@ -301,15 +269,9 @@ function taskConnect(cb){
   console.log('taskConnect: begin')
   gulpConnect.server({
     root: 'dist',
-    livereload: true,
-    // port: 8080
+    livereload: true
   }, function startedCallback(){
     console.log('taskConnect: end')
-    // const options = {
-    //   uri: 'http://localhost:8080',
-    //   app: 'chrome'
-    // }
-    // gulpOpen(options)
     cb()
   })
 }
@@ -322,9 +284,12 @@ function taskConnect(cb){
 
 function taskOpen(){
   console.log('taskOpen: begin')
+  const browser = os.platform() === 'linux' ? 'google-chrome' : (
+    os.platform() === 'darwin' ? 'google chrome' : (
+      os.platform() === 'win32' ? 'chrome' : 'firefox'))
   const options = {
     uri: 'http://localhost:8080',
-    app: 'google-chrome'
+    app: browser
   }
   return src('./dist/index.html')
     .pipe(gulpOpen(options))
