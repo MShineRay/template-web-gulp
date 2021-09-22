@@ -1,5 +1,4 @@
 const path = require('path')
-const server = require('./server')
 // var template = require("art-template")
 
 function resolveDev(dir) {
@@ -37,20 +36,6 @@ module.exports = {
     path: resolveBuild('**/*'),
     dest: path.join(__dirname, '../')
   },
-
-  // templateTag: {
-  //   /**
-  //    * 模板引擎设置项：
-  //    * cache: 关闭模板引擎渲染缓存
-  //    * openTag,closeTag: 修改开关标签
-  //    */
-
-  //   template.config("cache", false);
-  //   template.config("openTag", "{{{");
-  //   template.config("closeTag", "}}}");
-  // }
-
-  server,
-  useEslint: false,
-  productionZip: true
+  useEslint: true,
+  productionZip: false
 }
